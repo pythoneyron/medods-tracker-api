@@ -13,4 +13,22 @@ class Api::V1::BaseController < ApplicationController
       locals: { errors: { base: ['Resource not found'] } }
     )
   end
+
+  def render_errors(record)
+    render(
+      'api/v1/shared/errors',
+      formats: :json,
+      status: :unprocessable_content,
+      locals: { errors: record.errors.to_hash }
+    )
+  end
+
+  def render_message_error(message)
+    render(
+      'api/v1/shared/errors',
+      formats: :json,
+      status: :unprocessable_content,
+      locals: { errors: { base: [message] } }
+    )
+  end
 end

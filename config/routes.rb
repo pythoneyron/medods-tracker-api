@@ -17,7 +17,11 @@ Rails.application.routes.draw do
         delete 'users/sign_out', to: 'users/sessions#destroy', defaults: { format: :json }
       end
 
-      resources :tasks
+      resources :tasks do
+        resources :task_tags, only: %i[create destroy], path: 'tags', param: :tag_id
+      end
+
+      resources :tags
     end
   end
 end

@@ -45,17 +45,8 @@ class Api::V1::TasksController < Api::V1::BaseController
     params.permit(:status, :date, :date_from, :date_to)
   end
 
-  def render_errors(record)
-    render(
-      'api/v1/shared/errors',
-      formats: :json,
-      status: :unprocessable_content,
-      locals: { errors: record.errors.to_hash }
-    )
-  end
-
   def filtered_tasks
-    tasks = current_user.tasks.order(due_date: :asc, created_at: :asc)
+    tasks = current_user.tasks.includes(:tags).order(due_date: :asc, created_at: :asc)
 
     tasks = tasks.where(status: filter_params[:status]) if filter_params[:status].present?
 

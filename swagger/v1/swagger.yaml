@@ -1,0 +1,640 @@
+---
+openapi: 3.0.1
+info:
+  title: Medods Tracker API
+  version: v1
+paths:
+  "/api/v1/users":
+    post:
+      summary: Create user
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserResponse"
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  - password_confirmation
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                      format: password
+                    password_confirmation:
+                      type: string
+                      format: password
+  "/api/v1/users/sign_in":
+    post:
+      summary: Sign in user
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '200':
+          description: signed in
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserResponse"
+        '401':
+          description: invalid credentials
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                      format: password
+  "/api/v1/users/sign_out":
+    delete:
+      summary: Sign out user
+      tags:
+      - Auth
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: signed out
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnauthorizedResponse"
+  "/api/v1/tasks":
+    get:
+      summary: List tasks
+      tags:
+      - Tasks
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - new
+          - pending
+          - in_progress
+          - done
+          - cancelled
+      - name: date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: date_from
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: date_to
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: tasks list
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TasksResponse"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnauthorizedResponse"
+    post:
+      summary: Create task
+      tags:
+      - Tasks
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskResponse"
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - task
+              properties:
+                task:
+                  type: object
+                  required:
+                  - title
+                  - description
+                  - due_date
+                  - status
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    due_date:
+                      type: string
+                      format: date
+                    status:
+                      type: string
+                      enum:
+                      - new
+                      - pending
+                      - in_progress
+                      - done
+                      - cancelled
+  "/api/v1/tasks/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show task
+      tags:
+      - Tasks
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: task found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskResponse"
+        '404':
+          description: task not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    patch:
+      summary: Update task
+      tags:
+      - Tasks
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskResponse"
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - task
+              properties:
+                task:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    due_date:
+                      type: string
+                      format: date
+                    status:
+                      type: string
+                      enum:
+                      - new
+                      - pending
+                      - in_progress
+                      - done
+                      - cancelled
+    delete:
+      summary: Delete task
+      tags:
+      - Tasks
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: deleted
+        '404':
+          description: task not found
+  "/api/v1/tags":
+    get:
+      summary: List tags
+      tags:
+      - Tags
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: tags list
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TagsResponse"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnauthorizedResponse"
+    post:
+      summary: Create tag
+      tags:
+      - Tags
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TagResponse"
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - tag
+              properties:
+                tag:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+  "/api/v1/tags/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show tag
+      tags:
+      - Tags
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: tag found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TagResponse"
+        '404':
+          description: tag not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    patch:
+      summary: Update tag
+      tags:
+      - Tags
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TagResponse"
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - tag
+              properties:
+                tag:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+    delete:
+      summary: Delete tag
+      tags:
+      - Tags
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: deleted
+        '404':
+          description: tag not found
+  "/api/v1/tasks/{task_id}/tags":
+    parameters:
+    - name: task_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Attach tag to task
+      tags:
+      - Task tags
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: attached
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskResponse"
+        '404':
+          description: task or tag not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - tag
+              properties:
+                tag:
+                  type: object
+                  required:
+                  - id
+                  properties:
+                    id:
+                      type: integer
+  "/api/v1/tasks/{task_id}/tags/{tag_id}":
+    parameters:
+    - name: task_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: tag_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Detach tag from task
+      tags:
+      - Task tags
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: detached
+        '404':
+          description: task tag not found
+servers:
+- url: http://localhost:3000
+  description: Local development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    UnauthorizedResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: string
+    User:
+      type: object
+      required:
+      - id
+      - email
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    UserResponse:
+      type: object
+      required:
+      - user
+      properties:
+        user:
+          "$ref": "#/components/schemas/User"
+    Tag:
+      type: object
+      required:
+      - id
+      - name
+      - system
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        system:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    TagResponse:
+      type: object
+      required:
+      - tag
+      properties:
+        tag:
+          "$ref": "#/components/schemas/Tag"
+    TagsResponse:
+      type: object
+      required:
+      - tags
+      properties:
+        tags:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Tag"
+    Task:
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - due_date
+      - status
+      - tags
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        due_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - new
+          - pending
+          - in_progress
+          - done
+          - cancelled
+        tags:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Tag"
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    TaskResponse:
+      type: object
+      required:
+      - task
+      properties:
+        task:
+          "$ref": "#/components/schemas/Task"
+    TasksResponse:
+      type: object
+      required:
+      - tasks
+      properties:
+        tasks:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Task"

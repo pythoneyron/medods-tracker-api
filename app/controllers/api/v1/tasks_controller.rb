@@ -2,7 +2,7 @@ class Api::V1::TasksController < Api::V1::BaseController
   before_action :set_task, only: %i[ show update destroy ]
 
   def index
-    @tasks = filtered_tasks
+    @tasks = paginate_collection(filtered_tasks)
 
     render :index, status: :ok
   end
@@ -46,7 +46,7 @@ class Api::V1::TasksController < Api::V1::BaseController
   end
 
   def filtered_tasks
-    tasks = current_user.tasks.includes(:tags).order(due_date: :asc, created_at: :asc)
+    tasks = current_user.tasks.includes(:tags).order(due_date: :asc, created_at: :asc, id: :asc)
 
     tasks = tasks.where(status: filter_params[:status]) if filter_params[:status].present?
 

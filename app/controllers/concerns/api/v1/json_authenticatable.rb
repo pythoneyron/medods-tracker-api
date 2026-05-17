@@ -1,4 +1,4 @@
-module JsonAuthenticatable
+module Api::V1::JsonAuthenticatable
   private
 
   def render_auth_errors(record)

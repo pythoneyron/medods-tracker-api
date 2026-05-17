@@ -2,7 +2,9 @@ class Api::V1::TagsController < Api::V1::BaseController
   before_action :set_tag, only: %i[ show update destroy ]
 
   def index
-    @tags = Tag.available_for(current_user).order(system: :desc, name: :asc)
+    @tags = paginate_collection(
+      Tag.available_for(current_user).order(system: :desc, name: :asc, id: :asc)
+    )
 
     render :index, status: :ok
   end

@@ -4,7 +4,7 @@ class Tag < ApplicationRecord
   belongs_to :user, optional: true
 
   has_many :task_tags, dependent: :destroy
-  has_many :tags, through: :task_tags
+  has_many :tasks, through: :task_tags
 
   validates :name, presence: true, length: { maximum: 100 }
   validates :user, presence: true, unless: :system?

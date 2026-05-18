@@ -125,7 +125,7 @@ paths:
         schema:
           type: string
           enum:
-          - new
+          - planned
           - pending
           - in_progress
           - done
@@ -207,11 +207,31 @@ paths:
                     status:
                       type: string
                       enum:
-                      - new
+                      - planned
                       - pending
                       - in_progress
                       - done
                       - cancelled
+                    recurrence_type:
+                      type: string
+                      enum:
+                      - none
+                      - daily
+                      - monthly_day
+                      - specific_dates
+                      - even_days
+                      - odd_days
+                    recurrence_config:
+                      type: object
+                      additionalProperties: true
+                    recurrence_starts_on:
+                      type: string
+                      format: date
+                      nullable: true
+                    recurrence_ends_on:
+                      type: string
+                      format: date
+                      nullable: true
   "/api/v1/tasks/{id}":
     parameters:
     - name: id
@@ -279,11 +299,31 @@ paths:
                     status:
                       type: string
                       enum:
-                      - new
+                      - planned
                       - pending
                       - in_progress
                       - done
                       - cancelled
+                    recurrence_type:
+                      type: string
+                      enum:
+                      - none
+                      - daily
+                      - monthly_day
+                      - specific_dates
+                      - even_days
+                      - odd_days
+                    recurrence_config:
+                      type: object
+                      additionalProperties: true
+                    recurrence_starts_on:
+                      type: string
+                      format: date
+                      nullable: true
+                    recurrence_ends_on:
+                      type: string
+                      format: date
+                      nullable: true
     delete:
       summary: Delete task
       tags:
@@ -588,6 +628,11 @@ components:
       - description
       - due_date
       - status
+      - recurrence_type
+      - recurrence_config
+      - recurrence_starts_on
+      - recurrence_ends_on
+      - recurring
       - tags
       - created_at
       - updated_at
@@ -605,11 +650,33 @@ components:
         status:
           type: string
           enum:
-          - new
+          - planned
           - pending
           - in_progress
           - done
           - cancelled
+        recurrence_type:
+          type: string
+          enum:
+          - none
+          - daily
+          - monthly_day
+          - specific_dates
+          - even_days
+          - odd_days
+        recurrence_config:
+          type: object
+          additionalProperties: true
+        recurrence_starts_on:
+          type: string
+          format: date
+          nullable: true
+        recurrence_ends_on:
+          type: string
+          format: date
+          nullable: true
+        recurring:
+          type: boolean
         tags:
           type: array
           items:

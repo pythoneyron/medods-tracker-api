@@ -129,6 +129,39 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       expect(json_body.dig('task', 'status')).to eq('pending')
     end
 
+    it 'creates a recurring task for the current user' do
+      expect do
+        post(
+          api_v1_tasks_path,
+          params: {
+            task: {
+              title: 'Daily ward round',
+              description: 'Check assigned patients',
+              due_date: '2026-05-25',
+              status: 'planned',
+              recurrence_type: 'daily',
+              recurrence_config: { interval: 2 },
+              recurrence_starts_on: '2026-05-25',
+              recurrence_ends_on: '2026-06-25'
+            }
+          },
+          headers: headers,
+          as: :json
+        )
+      end.to change(Task, :count).by(1)
+
+      created_task = Task.order(:id).last
+
+      expect(response).to have_http_status(:created)
+      expect(created_task.recurrence_type).to eq('daily')
+      expect(created_task.recurrence_config).to eq('interval' => 2)
+      expect(created_task.recurrence_starts_on).to eq(Date.iso8601('2026-05-25'))
+      expect(created_task.recurrence_ends_on).to eq(Date.iso8601('2026-06-25'))
+      expect(json_body.dig('task', 'recurrence_type')).to eq('daily')
+      expect(json_body.dig('task', 'recurrence_config')).to eq('interval' => 2)
+      expect(json_body.dig('task', 'recurring')).to be(true)
+    end
+
     it 'returns validation errors for invalid attributes' do
       post(
         api_v1_tasks_path,
@@ -147,11 +180,32 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       expect(response).to have_http_status(:unprocessable_content)
       expect(json_body).to eq('errors' => { 'title' => ["can't be blank"] })
     end
+
+    it 'returns validation errors for invalid recurrence attributes' do
+      post(
+        api_v1_tasks_path,
+        params: {
+          task: {
+            title: 'Broken recurrence',
+            description: 'Invalid recurrence payload',
+            due_date: '2026-05-25',
+            status: 'planned',
+            recurrence_type: 'daily',
+            recurrence_config: { interval: 0 }
+          }
+        },
+        headers: headers,
+        as: :json
+      )
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body).to eq('errors' => { 'recurrence_config' => ['interval must be a positive integer'] })
+    end
   end
 
   describe 'PATCH /api/v1/tasks/:id' do
     it 'updates the current user task' do
-      task = FactoryBot.create(:task, user: user, title: 'Old title', status: 'new')
+      task = FactoryBot.create(:task, user: user, title: 'Old title', status: 'planned')
 
       patch(
         api_v1_task_path(task),
@@ -171,6 +225,30 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       expect(task.reload.title).to eq('New title')
       expect(task.status).to eq('done')
       expect(json_body.dig('task', 'title')).to eq('New title')
+    end
+
+    it 'updates recurrence attributes for the current user task' do
+      task = FactoryBot.create(:task, user: user)
+
+      patch(
+        api_v1_task_path(task),
+        params: {
+          task: {
+            recurrence_type: 'monthly_day',
+            recurrence_config: { day: 15 },
+            recurrence_starts_on: '2026-05-15',
+            recurrence_ends_on: '2026-08-15'
+          }
+        },
+        headers: headers,
+        as: :json
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(task.reload.recurrence_type).to eq('monthly_day')
+      expect(task.recurrence_config).to eq('day' => 15)
+      expect(json_body.dig('task', 'recurrence_type')).to eq('monthly_day')
+      expect(json_body.dig('task', 'recurring')).to be(true)
     end
 
     it 'returns not found when updating another user task' do

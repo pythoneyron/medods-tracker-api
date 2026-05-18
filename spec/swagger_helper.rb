@@ -95,7 +95,10 @@ RSpec.configure do |config|
           },
           Task: {
             type: :object,
-            required: %w[id title description due_date status tags created_at updated_at],
+            required: %w[
+              id title description due_date status recurrence_type recurrence_config
+              recurrence_starts_on recurrence_ends_on recurring tags created_at updated_at
+            ],
             properties: {
               id: { type: :integer },
               title: { type: :string },
@@ -103,8 +106,19 @@ RSpec.configure do |config|
               due_date: { type: :string, format: :date },
               status: {
                 type: :string,
-                enum: %w[new pending in_progress done cancelled]
+                enum: Task::STATUSES
               },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true },
+              recurring: { type: :boolean },
               tags: {
                 type: :array,
                 items: { '$ref' => '#/components/schemas/Tag' }

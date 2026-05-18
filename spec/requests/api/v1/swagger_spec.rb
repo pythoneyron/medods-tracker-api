@@ -156,7 +156,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
 
       parameter name: :status, in: :query, required: false, schema: {
         type: :string,
-        enum: %w[new pending in_progress done cancelled]
+        enum: Task::STATUSES
       }
       parameter name: :date, in: :query, required: false, schema: { type: :string, format: :date }
       parameter name: :date_from, in: :query, required: false, schema: { type: :string, format: :date }
@@ -199,8 +199,18 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
               due_date: { type: :string, format: :date },
               status: {
                 type: :string,
-                enum: %w[new pending in_progress done cancelled]
-              }
+                enum: Task::STATUSES
+              },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true }
             }
           }
         }
@@ -285,8 +295,18 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
               due_date: { type: :string, format: :date },
               status: {
                 type: :string,
-                enum: %w[new pending in_progress done cancelled]
-              }
+                enum: Task::STATUSES
+              },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true }
             }
           }
         }

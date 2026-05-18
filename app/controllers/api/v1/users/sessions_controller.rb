@@ -1,5 +1,5 @@
-class Api::V1::Users::SessionsController < Api::V1::BaseController
-  include  Api::V1::JsonAuthenticatable
+class Api::V1::Users::SessionsController < ApplicationController
+  include Api::V1::JsonAuthenticatable
 
   before_action :authenticate_user!, only: :destroy
 

@@ -38,7 +38,18 @@ class Api::V1::TasksController < Api::V1::BaseController
   end
 
   def task_params
-    params.expect(task: %i[ title description due_date status ])
+    params.expect(
+      task: [
+        :title,
+        :description,
+        :due_date,
+        :status,
+        :recurrence_type,
+        :recurrence_starts_on,
+        :recurrence_ends_on,
+        { recurrence_config: {} }
+      ]
+    )
   end
 
   def filter_params

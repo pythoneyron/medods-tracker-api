@@ -22,7 +22,7 @@ class Api::V1::TagsController < Api::V1::BaseController
   end
 
   def update
-    return render_message_error('System tag cannot be changed') if @tag.system?
+    return render_message_error("System tag cannot be changed") if @tag.system?
 
     return render :show, status: :ok if @tag.update(tag_params)
 
@@ -30,7 +30,7 @@ class Api::V1::TagsController < Api::V1::BaseController
   end
 
   def destroy
-    return render_message_error('System tag cannot be deleted') if @tag.system?
+    return render_message_error("System tag cannot be deleted") if @tag.system?
 
     @tag.destroy!
 

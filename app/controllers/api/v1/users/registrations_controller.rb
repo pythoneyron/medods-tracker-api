@@ -1,5 +1,5 @@
-class Api::V1::Users::RegistrationsController < Api::V1::BaseController
-  include  Api::V1::JsonAuthenticatable
+class Api::V1::Users::RegistrationsController < ApplicationController
+  include Api::V1::JsonAuthenticatable
 
   def create
     user = User.new(sign_up_params)

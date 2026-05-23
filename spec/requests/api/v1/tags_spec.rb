@@ -62,7 +62,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       get api_v1_tag_path(tag), headers: headers
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
   end
 
@@ -96,7 +96,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       )
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(json_body).to eq('errors' => { 'name' => ["can't be blank"] })
+      expect(json_body).to eq('errors' => { 'name' => [ "can't be blank" ] })
     end
 
     it 'returns validation errors for a duplicate user tag name' do
@@ -110,7 +110,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       )
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(json_body).to eq('errors' => { 'name' => ['has already been taken'] })
+      expect(json_body).to eq('errors' => { 'name' => [ 'has already been taken' ] })
     end
   end
 
@@ -141,7 +141,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       )
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'does not update a system tag' do
@@ -156,7 +156,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(tag.reload.name).to eq('reporting')
-      expect(json_body).to eq('errors' => { 'base' => ['System tag cannot be changed'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'System tag cannot be changed' ] })
     end
 
     it 'returns validation errors for invalid updates' do
@@ -171,7 +171,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(tag.reload.name).to eq('Tag')
-      expect(json_body).to eq('errors' => { 'name' => ["can't be blank"] })
+      expect(json_body).to eq('errors' => { 'name' => [ "can't be blank" ] })
     end
   end
 
@@ -195,7 +195,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       end.not_to change(Tag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'does not delete a system tag' do
@@ -206,7 +206,7 @@ RSpec.describe 'Api::V1::Tags', type: :request do
       end.not_to change(Tag, :count)
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(json_body).to eq('errors' => { 'base' => ['System tag cannot be deleted'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'System tag cannot be deleted' ] })
     end
   end
 

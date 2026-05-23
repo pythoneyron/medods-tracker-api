@@ -6,7 +6,7 @@ module Api::V1::JsonAuthenticatable
   end
 
   def render_invalid_credentials
-    render json: { errors: { base: ['Invalid email or password'] } }, status: :unauthorized
+    render json: { errors: { base: [ "Invalid email or password" ] } }, status: :unauthorized
   end
 
   def serialized_user(user)
@@ -21,6 +21,6 @@ module Api::V1::JsonAuthenticatable
   def set_authorization_header(user)
     token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
 
-    response.set_header('Authorization', "Bearer #{token}")
+    response.set_header("Authorization", "Bearer #{token}")
   end
 end

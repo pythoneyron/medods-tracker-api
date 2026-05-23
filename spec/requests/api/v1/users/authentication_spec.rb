@@ -84,7 +84,7 @@ RSpec.describe 'Api::V1::Users authentication', type: :request do
       )
 
       expect(response).to have_http_status(:unauthorized)
-      expect(json_body).to eq('errors' => { 'base' => ['Invalid email or password'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Invalid email or password' ] })
     end
   end
 

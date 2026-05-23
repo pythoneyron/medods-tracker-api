@@ -127,7 +127,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
     delete 'Sign out user' do
       tags 'Auth'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '200', 'signed out' do
         schema type: :object,
@@ -152,15 +152,26 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
     get 'List tasks' do
       tags 'Tasks'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :status, in: :query, required: false, schema: {
         type: :string,
-        enum: %w[new pending in_progress done cancelled]
+        enum: Task::STATUSES
       }
       parameter name: :date, in: :query, required: false, schema: { type: :string, format: :date }
       parameter name: :date_from, in: :query, required: false, schema: { type: :string, format: :date }
       parameter name: :date_to, in: :query, required: false, schema: { type: :string, format: :date }
+      parameter name: :'page[number]', in: :query, required: false, schema: {
+        type: :integer,
+        minimum: 1,
+        default: 1
+      }
+      parameter name: :'page[size]', in: :query, required: false, schema: {
+        type: :integer,
+        minimum: 1,
+        maximum: Pagy::OPTIONS.fetch(:max_limit),
+        default: Pagy::OPTIONS.fetch(:limit)
+      }
 
       response '200', 'tasks list' do
         schema '$ref' => '#/components/schemas/TasksResponse'
@@ -168,6 +179,14 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
         before do
           FactoryBot.create(:task, user: user, title: 'Swagger task')
         end
+
+        run_test!
+      end
+
+      response '400', 'invalid query params' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:date_from) { '2026-05-22' }
+        let(:date_to) { '2026-05-21' }
 
         run_test!
       end
@@ -184,7 +203,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       tags 'Tasks'
       consumes 'application/json'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :payload, in: :body, schema: {
         type: :object,
@@ -199,8 +218,18 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
               due_date: { type: :string, format: :date },
               status: {
                 type: :string,
-                enum: %w[new pending in_progress done cancelled]
-              }
+                enum: Task::STATUSES
+              },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true }
             }
           }
         }
@@ -248,7 +277,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
     get 'Show task' do
       tags 'Tasks'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '200', 'task found' do
         schema '$ref' => '#/components/schemas/TaskResponse'
@@ -271,7 +300,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       tags 'Tasks'
       consumes 'application/json'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :payload, in: :body, schema: {
         type: :object,
@@ -285,8 +314,18 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
               due_date: { type: :string, format: :date },
               status: {
                 type: :string,
-                enum: %w[new pending in_progress done cancelled]
-              }
+                enum: Task::STATUSES
+              },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true }
             }
           }
         }
@@ -315,7 +354,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
 
     delete 'Delete task' do
       tags 'Tasks'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '204', 'deleted' do
         let(:task) { FactoryBot.create(:task, user: user) }
@@ -333,11 +372,111 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
     end
   end
 
+  path '/api/v1/tasks/{task_id}/occurrences/{date}' do
+    parameter name: :task_id, in: :path, required: true, schema: { type: :integer }
+    parameter name: :date, in: :path, required: true, schema: { type: :string, format: :date }
+
+    patch 'Update recurring task occurrence status' do
+      tags 'Task occurrences'
+      consumes 'application/json'
+      produces 'application/json'
+      security [ { bearerAuth: [] } ]
+
+      parameter name: :payload, in: :body, schema: {
+        type: :object,
+        required: %w[task_occurrence],
+        properties: {
+          task_occurrence: {
+            type: :object,
+            required: %w[status],
+            properties: {
+              status: {
+                type: :string,
+                enum: TaskOccurrence::STATUSES
+              }
+            }
+          }
+        }
+      }
+
+      response '200', 'updated' do
+        schema '$ref' => '#/components/schemas/TaskItemResponse'
+
+        let(:task) do
+          FactoryBot.create(
+            :task,
+            :daily,
+            user: user,
+            recurrence_config: { 'interval' => 1 },
+            recurrence_starts_on: Date.iso8601('2026-05-20'),
+            recurrence_ends_on: Date.iso8601('2026-05-22')
+          )
+        end
+        let(:task_id) { task.id }
+        let(:date) { '2026-05-21' }
+        let(:payload) { { task_occurrence: { status: 'done' } } }
+
+        run_test!
+      end
+
+      response '400', 'invalid occurrence params' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:task) do
+          FactoryBot.create(
+            :task,
+            :daily,
+            user: user,
+            recurrence_config: { 'interval' => 1 },
+            recurrence_starts_on: Date.iso8601('2026-05-20'),
+            recurrence_ends_on: Date.iso8601('2026-05-22')
+          )
+        end
+        let(:task_id) { task.id }
+        let(:date) { '2026-05-21' }
+        let(:payload) { { task_occurrence: { status: 'archived' } } }
+
+        run_test!
+      end
+
+      response '404', 'task not found' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:task_id) { 0 }
+        let(:date) { '2026-05-21' }
+        let(:payload) { { task_occurrence: { status: 'done' } } }
+
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/UnauthorizedResponse'
+
+        let(:task) do
+          FactoryBot.create(
+            :task,
+            :daily,
+            user: user,
+            recurrence_config: { 'interval' => 1 },
+            recurrence_starts_on: Date.iso8601('2026-05-20'),
+            recurrence_ends_on: Date.iso8601('2026-05-22')
+          )
+        end
+        let(:task_id) { task.id }
+        let(:date) { '2026-05-21' }
+        let(:payload) { { task_occurrence: { status: 'done' } } }
+        let(:Authorization) { nil }
+
+        run_test!
+      end
+    end
+  end
+
   path '/api/v1/tags' do
     get 'List tags' do
       tags 'Tags'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '200', 'tags list' do
         schema '$ref' => '#/components/schemas/TagsResponse'
@@ -362,7 +501,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       tags 'Tags'
       consumes 'application/json'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :payload, in: :body, schema: {
         type: :object,
@@ -402,7 +541,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
     get 'Show tag' do
       tags 'Tags'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '200', 'tag found' do
         schema '$ref' => '#/components/schemas/TagResponse'
@@ -425,7 +564,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       tags 'Tags'
       consumes 'application/json'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :payload, in: :body, schema: {
         type: :object,
@@ -463,7 +602,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
 
     delete 'Delete tag' do
       tags 'Tags'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '204', 'deleted' do
         let(:tag) { FactoryBot.create(:tag, user: user) }
@@ -488,7 +627,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       tags 'Task tags'
       consumes 'application/json'
       produces 'application/json'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       parameter name: :payload, in: :body, schema: {
         type: :object,
@@ -532,7 +671,7 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
 
     delete 'Detach tag from task' do
       tags 'Task tags'
-      security [{ bearerAuth: [] }]
+      security [ { bearerAuth: [] } ]
 
       response '204', 'detached' do
         let(:task) { FactoryBot.create(:task, user: user) }

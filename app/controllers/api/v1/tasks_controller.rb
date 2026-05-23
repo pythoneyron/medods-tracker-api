@@ -2,7 +2,13 @@ class Api::V1::TasksController < Api::V1::BaseController
   before_action :set_task, only: %i[ show update destroy ]
 
   def index
-    @tasks = paginate_collection(filtered_tasks)
+    result = Tasks::IndexQuery.call(user: current_user, params: filter_params)
+
+    return render_bad_request(base: result.errors) unless result.success?
+
+    @task_items = paginate_collection(result.items)
+    @date_from = result.date_from
+    @date_to = result.date_to
 
     render :index, status: :ok
   end
@@ -38,24 +44,21 @@ class Api::V1::TasksController < Api::V1::BaseController
   end
 
   def task_params
-    params.expect(task: %i[ title description due_date status ])
+    params.expect(
+      task: [
+        :title,
+        :description,
+        :due_date,
+        :status,
+        :recurrence_type,
+        :recurrence_starts_on,
+        :recurrence_ends_on,
+        { recurrence_config: {} }
+      ]
+    )
   end
 
   def filter_params
     params.permit(:status, :date, :date_from, :date_to)
-  end
-
-  def filtered_tasks
-    tasks = current_user.tasks.includes(:tags).order(due_date: :asc, created_at: :asc, id: :asc)
-
-    tasks = tasks.where(status: filter_params[:status]) if filter_params[:status].present?
-
-    if filter_params[:date].present?
-      tasks = tasks.where(due_date: filter_params[:date])
-    elsif filter_params[:date_from].present? && filter_params[:date_to].present?
-      tasks = tasks.where(due_date: filter_params[:date_from]..filter_params[:date_to])
-    end
-
-    tasks
   end
 end

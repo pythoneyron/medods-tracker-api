@@ -29,6 +29,19 @@ class Task < ApplicationRecord
     self.recurrence_type = 'none' if recurrence_type.blank?
     self.recurrence_config = {} if recurrence_config.nil?
 
+    normalize_non_recurring_fields
+    set_default_recurrence_starts_on
+  end
+
+  def normalize_non_recurring_fields
+    return if recurring?
+
+    self.recurrence_config = {}
+    self.recurrence_starts_on = nil
+    self.recurrence_ends_on = nil
+  end
+
+  def set_default_recurrence_starts_on
     return unless recurring?
     return if recurrence_starts_on.present?
 

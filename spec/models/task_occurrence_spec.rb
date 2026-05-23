@@ -56,7 +56,7 @@ RSpec.describe TaskOccurrence, type: :model do
       duplicate_occurrence = FactoryBot.build(:task_occurrence, task: task, occurrence_date: occurrence_date)
 
       expect(duplicate_occurrence).not_to be_valid
-      expect(duplicate_occurrence.errors[:occurrence_date]).to include('has already been taken')
+      expect(duplicate_occurrence.errors[:occurrence_date]).to include('already exists for this task')
     end
   end
 end

@@ -8,7 +8,7 @@ FactoryBot.define do
     trait :system do
       user { nil }
       system { true }
-      sequence(:name) { |n| "system-tag-#{n}" }
+      name { 'call' }
     end
   end
 end

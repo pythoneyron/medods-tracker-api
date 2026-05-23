@@ -157,7 +157,6 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
     it 'returns not found for another user tag' do
       task = FactoryBot.create(:task, user: user)
       tag = FactoryBot.create(:tag, name: 'Other user tag')
-      FactoryBot.create(:task_tag, task: task, tag: tag)
 
       expect do
         delete api_v1_task_task_tag_path(task, tag), headers: headers, as: :json

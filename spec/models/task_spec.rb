@@ -82,7 +82,7 @@ RSpec.describe Task, type: :model do
     end
 
     it 'requires recurrence config to be an object' do
-      task = FactoryBot.build(:task, recurrence_config: [])
+      task = FactoryBot.build(:task, :daily, recurrence_config: [])
 
       expect(task).not_to be_valid
       expect(task.errors[:recurrence_config]).to include('must be an object')
@@ -126,6 +126,21 @@ RSpec.describe Task, type: :model do
 
       expect(task).not_to be_valid
       expect(task.errors[:recurrence_config]).to include('dates must be a non-empty array')
+    end
+
+    it 'normalizes recurrence fields for non-recurring tasks' do
+      task = FactoryBot.build(
+        :task,
+        recurrence_type: 'none',
+        recurrence_config: { 'interval' => 2 },
+        recurrence_starts_on: Date.iso8601('2026-05-20'),
+        recurrence_ends_on: Date.iso8601('2026-05-25')
+      )
+
+      expect(task).to be_valid
+      expect(task.recurrence_config).to eq({})
+      expect(task.recurrence_starts_on).to be_nil
+      expect(task.recurrence_ends_on).to be_nil
     end
   end
 end

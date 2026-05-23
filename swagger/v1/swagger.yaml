@@ -148,6 +148,21 @@ paths:
         schema:
           type: string
           format: date
+      - name: page[number]
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: page[size]
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
       responses:
         '200':
           description: tasks list
@@ -155,6 +170,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TasksResponse"
+        '400':
+          description: invalid query params
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
         '401':
           description: unauthorized
           content:
@@ -696,12 +717,97 @@ components:
       properties:
         task:
           "$ref": "#/components/schemas/Task"
+    TaskItem:
+      type: object
+      required:
+      - id
+      - task_id
+      - occurrence_date
+      - title
+      - description
+      - due_date
+      - status
+      - recurring
+      - recurrence_type
+      - recurrence_config
+      - recurrence_starts_on
+      - recurrence_ends_on
+      - tags
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Task id kept for backward compatibility
+        task_id:
+          type: integer
+        occurrence_date:
+          type: string
+          format: date
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        due_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - planned
+          - pending
+          - in_progress
+          - done
+          - cancelled
+        recurring:
+          type: boolean
+        recurrence_type:
+          type: string
+          enum:
+          - none
+          - daily
+          - monthly_day
+          - specific_dates
+          - even_days
+          - odd_days
+        recurrence_config:
+          type: object
+          additionalProperties: true
+        recurrence_starts_on:
+          type: string
+          format: date
+          nullable: true
+        recurrence_ends_on:
+          type: string
+          format: date
+          nullable: true
+        tags:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Tag"
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
     TasksResponse:
       type: object
       required:
       - tasks
+      - meta
+      - links
       properties:
         tasks:
           type: array
           items:
-            "$ref": "#/components/schemas/Task"
+            "$ref": "#/components/schemas/TaskItem"
+        meta:
+          type: object
+          additionalProperties: true
+        links:
+          type: object
+          additionalProperties: true

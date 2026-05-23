@@ -33,7 +33,11 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
         first_task = FactoryBot.create(:task, user: user, title: 'First task', due_date: Date.iso8601('2026-05-18'))
       end
 
-      get api_v1_tasks_path, headers: headers
+      get(
+        api_v1_tasks_path,
+        params: { date_from: '2026-05-18', date_to: '2026-05-20' },
+        headers: headers
+      )
 
       expect(response).to have_http_status(:ok)
       expect(task_ids_from_response).to eq([first_task.id, second_task.id, third_task.id])
@@ -74,6 +78,115 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(task_ids_from_response).to eq([inside_range_task.id, second_inside_range_task.id])
+    end
+
+    it 'returns generated occurrences for recurring tasks inside the requested date range' do
+      task = FactoryBot.create(
+        :task,
+        :daily,
+        user: user,
+        title: 'Daily ward round',
+        recurrence_config: { 'interval' => 2 },
+        recurrence_starts_on: Date.iso8601('2026-05-20'),
+        recurrence_ends_on: Date.iso8601('2026-05-25')
+      )
+
+      get(
+        api_v1_tasks_path,
+        params: { date_from: '2026-05-20', date_to: '2026-05-25' },
+        headers: headers
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(task_ids_from_response).to eq([task.id, task.id, task.id])
+      expect(occurrence_dates_from_response).to eq(%w[2026-05-20 2026-05-22 2026-05-24])
+      expect(json_body.fetch('tasks').first).to include(
+        'task_id' => task.id,
+        'recurring' => true,
+        'recurrence_type' => 'daily'
+      )
+    end
+
+    it 'uses task occurrence status overrides when filtering by status' do
+      task = FactoryBot.create(
+        :task,
+        :daily,
+        user: user,
+        status: 'planned',
+        recurrence_config: { 'interval' => 1 },
+        recurrence_starts_on: Date.iso8601('2026-05-20'),
+        recurrence_ends_on: Date.iso8601('2026-05-22')
+      )
+      FactoryBot.create(
+        :task_occurrence,
+        task: task,
+        occurrence_date: Date.iso8601('2026-05-21'),
+        status: 'done'
+      )
+
+      get(
+        api_v1_tasks_path,
+        params: { status: 'done', date_from: '2026-05-20', date_to: '2026-05-22' },
+        headers: headers
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(task_ids_from_response).to eq([task.id])
+      expect(occurrence_dates_from_response).to eq(['2026-05-21'])
+      expect(json_body.dig('tasks', 0, 'status')).to eq('done')
+    end
+
+    it 'returns bad request for an invalid date filter' do
+      get api_v1_tasks_path, params: { date: 'broken-date' }, headers: headers
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_body).to eq('errors' => { 'base' => ['date must be a valid ISO8601 date'] })
+    end
+
+    it 'returns bad request for an unsupported status filter' do
+      get api_v1_tasks_path, params: { status: 'archived' }, headers: headers
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_body).to eq('errors' => { 'base' => ['status is not included in the list'] })
+    end
+
+    it 'returns bad request when date range is too large' do
+      get(
+        api_v1_tasks_path,
+        params: { date_from: '2026-01-01', date_to: '2027-01-03' },
+        headers: headers
+      )
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_body).to eq('errors' => { 'base' => ['date range cannot be greater than 366 days'] })
+    end
+
+    it 'paginates task occurrence items' do
+      first_task = FactoryBot.create(:task, user: user, due_date: Date.iso8601('2026-05-20'))
+      second_task = FactoryBot.create(:task, user: user, due_date: Date.iso8601('2026-05-21'))
+      third_task = FactoryBot.create(:task, user: user, due_date: Date.iso8601('2026-05-22'))
+
+      get(
+        api_v1_tasks_path,
+        params: {
+          date_from: '2026-05-20',
+          date_to: '2026-05-22',
+          page: { number: 2, size: 2 }
+        },
+        headers: headers
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(task_ids_from_response).to eq([third_task.id])
+      expect(task_ids_from_response).not_to include(first_task.id, second_task.id)
+      expect(json_body.dig('meta', 'pagination')).to include(
+        'current_page' => 2,
+        'page_size' => 2,
+        'total_count' => 3,
+        'total_pages' => 2,
+        'previous_page' => 1,
+        'next_page' => nil
+      )
     end
   end
 
@@ -318,5 +431,9 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
 
   def task_ids_from_response
     json_body.fetch('tasks').map { |task| task.fetch('id') }
+  end
+
+  def occurrence_dates_from_response
+    json_body.fetch('tasks').map { |task| task.fetch('occurrence_date') }
   end
 end

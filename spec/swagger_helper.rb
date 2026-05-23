@@ -134,13 +134,57 @@ RSpec.configure do |config|
               task: { '$ref' => '#/components/schemas/Task' }
             }
           },
+          TaskItem: {
+            type: :object,
+            required: %w[
+              id task_id occurrence_date title description due_date status recurring recurrence_type
+              recurrence_config recurrence_starts_on recurrence_ends_on tags created_at updated_at
+            ],
+            properties: {
+              id: { type: :integer, description: 'Task id kept for backward compatibility' },
+              task_id: { type: :integer },
+              occurrence_date: { type: :string, format: :date },
+              title: { type: :string },
+              description: { type: :string, nullable: true },
+              due_date: { type: :string, format: :date },
+              status: {
+                type: :string,
+                enum: Task::STATUSES
+              },
+              recurring: { type: :boolean },
+              recurrence_type: {
+                type: :string,
+                enum: Task::RECURRENCE_TYPES
+              },
+              recurrence_config: {
+                type: :object,
+                additionalProperties: true
+              },
+              recurrence_starts_on: { type: :string, format: :date, nullable: true },
+              recurrence_ends_on: { type: :string, format: :date, nullable: true },
+              tags: {
+                type: :array,
+                items: { '$ref' => '#/components/schemas/Tag' }
+              },
+              created_at: { type: :string, format: :'date-time', nullable: true },
+              updated_at: { type: :string, format: :'date-time', nullable: true }
+            }
+          },
           TasksResponse: {
             type: :object,
-            required: %w[tasks],
+            required: %w[tasks meta links],
             properties: {
               tasks: {
                 type: :array,
-                items: { '$ref' => '#/components/schemas/Task' }
+                items: { '$ref' => '#/components/schemas/TaskItem' }
+              },
+              meta: {
+                type: :object,
+                additionalProperties: true
+              },
+              links: {
+                type: :object,
+                additionalProperties: true
               }
             }
           }

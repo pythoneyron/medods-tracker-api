@@ -161,6 +161,17 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
       parameter name: :date, in: :query, required: false, schema: { type: :string, format: :date }
       parameter name: :date_from, in: :query, required: false, schema: { type: :string, format: :date }
       parameter name: :date_to, in: :query, required: false, schema: { type: :string, format: :date }
+      parameter name: :'page[number]', in: :query, required: false, schema: {
+        type: :integer,
+        minimum: 1,
+        default: 1
+      }
+      parameter name: :'page[size]', in: :query, required: false, schema: {
+        type: :integer,
+        minimum: 1,
+        maximum: Pagy::OPTIONS.fetch(:max_limit),
+        default: Pagy::OPTIONS.fetch(:limit)
+      }
 
       response '200', 'tasks list' do
         schema '$ref' => '#/components/schemas/TasksResponse'
@@ -168,6 +179,14 @@ RSpec.describe 'Api::V1 Swagger', type: :request do
         before do
           FactoryBot.create(:task, user: user, title: 'Swagger task')
         end
+
+        run_test!
+      end
+
+      response '400', 'invalid query params' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:date_from) { '2026-05-22' }
+        let(:date_to) { '2026-05-21' }
 
         run_test!
       end

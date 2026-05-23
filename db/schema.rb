@@ -42,7 +42,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171733) do
     t.datetime "updated_at", null: false
     t.index ["occurrence_date", "status"], name: "index_task_occurrences_on_date_and_status"
     t.index ["task_id", "occurrence_date"], name: "index_task_occurrences_on_task_and_date", unique: true
-    t.check_constraint "status::text = ANY (ARRAY['planned'::character varying::text, 'pending'::character varying::text, 'in_progress'::character varying::text, 'done'::character varying::text, 'cancelled'::character varying::text])", name: "task_occurrence_status_allowed"
+    t.check_constraint "status::text = ANY (ARRAY['planned'::character varying, 'pending'::character varying, 'in_progress'::character varying, 'done'::character varying, 'cancelled'::character varying]::text[])", name: "task_occurrence_status_allowed"
   end
 
   create_table "task_tags", force: :cascade do |t|
@@ -79,8 +79,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171733) do
     t.check_constraint "recurrence_ends_on IS NULL OR recurrence_starts_on IS NULL OR recurrence_ends_on >= recurrence_starts_on", name: "task_recurrence_ends_on_after_starts_on"
     t.check_constraint "recurrence_type::text <> 'none'::text OR recurrence_starts_on IS NULL AND recurrence_ends_on IS NULL", name: "non_recurring_task_has_no_recurrence_period"
     t.check_constraint "recurrence_type::text = 'none'::text OR recurrence_starts_on IS NOT NULL", name: "recurring_task_starts_on_required"
-    t.check_constraint "recurrence_type::text = ANY (ARRAY['none'::character varying::text, 'daily'::character varying::text, 'monthly_day'::character varying::text, 'specific_dates'::character varying::text, 'even_days'::character varying::text, 'odd_days'::character varying::text])", name: "task_recurrence_type_allowed"
-    t.check_constraint "status::text = ANY (ARRAY['planned'::character varying::text, 'pending'::character varying::text, 'in_progress'::character varying::text, 'done'::character varying::text, 'cancelled'::character varying::text])", name: "task_status_allowed"
+    t.check_constraint "recurrence_type::text = ANY (ARRAY['none'::character varying, 'daily'::character varying, 'monthly_day'::character varying, 'specific_dates'::character varying, 'even_days'::character varying, 'odd_days'::character varying]::text[])", name: "task_recurrence_type_allowed"
+    t.check_constraint "status::text = ANY (ARRAY['planned'::character varying, 'pending'::character varying, 'in_progress'::character varying, 'done'::character varying, 'cancelled'::character varying]::text[])", name: "task_status_allowed"
   end
 
   create_table "users", force: :cascade do |t|
@@ -92,7 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171733) do
   end
 
   add_foreign_key "tags", "users"
-  add_foreign_key "task_occurrences", "tasks", on_delete: :cascade
+  add_foreign_key "task_occurrences", "tasks"
   add_foreign_key "task_tags", "tags"
   add_foreign_key "task_tags", "tasks"
   add_foreign_key "tasks", "users"

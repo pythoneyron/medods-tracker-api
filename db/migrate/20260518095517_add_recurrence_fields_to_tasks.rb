@@ -7,9 +7,9 @@ class AddRecurrenceFieldsToTasks < ActiveRecord::Migration[8.1]
     add_column :tasks, :recurrence_starts_on, :date
     add_column :tasks, :recurrence_ends_on, :date
 
-    add_index :tasks, [:user_id, :recurrence_type]
-    add_index :tasks, [:user_id, :recurrence_starts_on]
-    add_index :tasks, [:user_id, :recurrence_ends_on]
+    add_index :tasks, [ :user_id, :recurrence_type ]
+    add_index :tasks, [ :user_id, :recurrence_starts_on ]
+    add_index :tasks, [ :user_id, :recurrence_ends_on ]
 
     add_check_constraint(
       :tasks,

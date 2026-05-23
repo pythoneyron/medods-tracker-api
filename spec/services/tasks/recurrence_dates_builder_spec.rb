@@ -202,7 +202,7 @@ RSpec.describe Tasks::RecurrenceDatesBuilder do
         date_to: Date.iso8601('2026-07-31')
       )
 
-      expect(result).to eq([Date.iso8601('2026-06-15')])
+      expect(result).to eq([ Date.iso8601('2026-06-15') ])
     end
 
     it 'returns unique sorted specific dates inside effective window' do
@@ -255,7 +255,7 @@ RSpec.describe Tasks::RecurrenceDatesBuilder do
         date_to: Date.iso8601('2026-05-31')
       )
 
-      expect(result).to eq([Date.iso8601('2026-05-17')])
+      expect(result).to eq([ Date.iso8601('2026-05-17') ])
     end
 
     it 'returns even days of month' do

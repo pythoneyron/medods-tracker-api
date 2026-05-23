@@ -356,6 +356,72 @@ paths:
           description: deleted
         '404':
           description: task not found
+  "/api/v1/tasks/{task_id}/occurrences/{date}":
+    parameters:
+    - name: task_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: date
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date
+    patch:
+      summary: Update recurring task occurrence status
+      tags:
+      - Task occurrences
+      security:
+      - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TaskItemResponse"
+        '400':
+          description: invalid occurrence params
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: task not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnauthorizedResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - task_occurrence
+              properties:
+                task_occurrence:
+                  type: object
+                  required:
+                  - status
+                  properties:
+                    status:
+                      type: string
+                      enum:
+                      - planned
+                      - pending
+                      - in_progress
+                      - done
+                      - cancelled
   "/api/v1/tags":
     get:
       summary: List tags
@@ -794,6 +860,13 @@ components:
           type: string
           format: date-time
           nullable: true
+    TaskItemResponse:
+      type: object
+      required:
+      - task
+      properties:
+        task:
+          "$ref": "#/components/schemas/TaskItem"
     TasksResponse:
       type: object
       required:

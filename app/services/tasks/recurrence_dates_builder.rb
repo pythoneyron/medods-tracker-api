@@ -52,8 +52,8 @@ class Tasks::RecurrenceDatesBuilder
   end
 
   def build_effective_date_range
-    starts_on = [date_from, recurrence_starts_on].max
-    ends_on = [date_to, recurrence_ends_on].compact.min
+    starts_on = [ date_from, recurrence_starts_on ].max
+    ends_on = [ date_to, recurrence_ends_on ].compact.min
 
     return if ends_on < starts_on
 
@@ -69,7 +69,7 @@ class Tasks::RecurrenceDatesBuilder
   end
 
   def daily_dates
-    interval = task.recurrence_config.fetch('interval').to_i
+    interval = task.recurrence_config.fetch("interval").to_i
     days_offset = (effective_start - recurrence_starts_on).to_i
     remainder = days_offset % interval
     first_date = remainder.zero? ? effective_start : effective_start + (interval - remainder)
@@ -86,7 +86,7 @@ class Tasks::RecurrenceDatesBuilder
   end
 
   def monthly_day_dates
-    day = task.recurrence_config.fetch('day').to_i
+    day = task.recurrence_config.fetch("day").to_i
     dates = []
 
     current_month = Date.new(effective_start.year, effective_start.month, 1)
@@ -107,7 +107,7 @@ class Tasks::RecurrenceDatesBuilder
   def specific_dates
     task
       .recurrence_config
-      .fetch('dates')
+      .fetch("dates")
       .map { |raw_date| Date.iso8601(raw_date.to_s) }
       .uniq
       .sort

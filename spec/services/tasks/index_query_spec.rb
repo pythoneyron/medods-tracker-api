@@ -20,7 +20,7 @@ RSpec.describe Tasks::IndexQuery do
       expect(result).to be_success
       expect(result.date_from).to eq(Date.iso8601('2026-05-19'))
       expect(result.date_to).to eq(Date.iso8601('2026-05-20'))
-      expect(result.items.map(&:task_id)).to eq([first_task.id, second_task.id])
+      expect(result.items.map(&:task_id)).to eq([ first_task.id, second_task.id ])
       expect(result.items.map(&:task_id)).not_to include(other_task.id)
       expect(result.items.map(&:occurrence_date)).to eq(
         [
@@ -46,7 +46,7 @@ RSpec.describe Tasks::IndexQuery do
       )
 
       expect(result).to be_success
-      expect(result.items.map(&:task_id)).to eq([task.id, task.id, task.id])
+      expect(result.items.map(&:task_id)).to eq([ task.id, task.id, task.id ])
       expect(result.items.map(&:occurrence_date)).to eq(
         [
           Date.iso8601('2026-05-20'),
@@ -96,7 +96,7 @@ RSpec.describe Tasks::IndexQuery do
       )
 
       expect(result).not_to be_success
-      expect(result.errors).to eq(['status is not included in the list'])
+      expect(result.errors).to eq([ 'status is not included in the list' ])
       expect(result.items).to eq([])
       expect(result.date_from).to be_nil
       expect(result.date_to).to be_nil
@@ -112,7 +112,7 @@ RSpec.describe Tasks::IndexQuery do
         expect(result).to be_success
         expect(result.date_from).to eq(Date.iso8601('2026-05-21'))
         expect(result.date_to).to eq(Date.iso8601('2026-06-20'))
-        expect(result.items.map(&:task_id)).to eq([inside_task.id])
+        expect(result.items.map(&:task_id)).to eq([ inside_task.id ])
       end
     end
 
@@ -125,14 +125,14 @@ RSpec.describe Tasks::IndexQuery do
       expect(result).to be_success
       expect(result.date_from).to eq(Date.iso8601('2026-05-21'))
       expect(result.date_to).to eq(Date.iso8601('2026-05-21'))
-      expect(result.items.map(&:task_id)).to eq([matching_task.id])
+      expect(result.items.map(&:task_id)).to eq([ matching_task.id ])
     end
 
     it 'returns errors for an invalid date' do
       result = described_class.call(user: user, params: { date: 'broken-date' })
 
       expect(result).not_to be_success
-      expect(result.errors).to eq(['date must be a valid ISO8601 date'])
+      expect(result.errors).to eq([ 'date must be a valid ISO8601 date' ])
       expect(result.items).to eq([])
     end
 
@@ -143,7 +143,7 @@ RSpec.describe Tasks::IndexQuery do
       )
 
       expect(result).not_to be_success
-      expect(result.errors).to eq(['date_to must be greater than or equal to date_from'])
+      expect(result.errors).to eq([ 'date_to must be greater than or equal to date_from' ])
       expect(result.items).to eq([])
     end
 
@@ -154,7 +154,7 @@ RSpec.describe Tasks::IndexQuery do
       )
 
       expect(result).not_to be_success
-      expect(result.errors).to eq(['date range cannot be greater than 366 days'])
+      expect(result.errors).to eq([ 'date range cannot be greater than 366 days' ])
       expect(result.items).to eq([])
     end
   end

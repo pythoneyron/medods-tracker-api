@@ -8,7 +8,7 @@ module Api::V1::Paginatable
 
     def initialize(errors)
       @errors = errors
-      super('Invalid pagination parameters')
+      super("Invalid pagination parameters")
     end
   end
 
@@ -36,23 +36,23 @@ module Api::V1::Paginatable
   def pagination_options
     {
       jsonapi: true,
-      page_key: 'number',
-      limit_key: 'size',
+      page_key: "number",
+      limit_key: "size",
       page: pagination_page_number,
       limit: pagination_page_size
     }
   end
 
   def pagination_page_number
-    positive_integer(params.dig(:page, :number), 'page.number') || 1
+    positive_integer(params.dig(:page, :number), "page.number") || 1
   end
 
   def pagination_page_size
-    value = positive_integer(params.dig(:page, :size), 'page.size') || pagination_default_limit
+    value = positive_integer(params.dig(:page, :size), "page.size") || pagination_default_limit
 
     return value if value <= pagination_max_limit
 
-    raise InvalidPaginationParams, 'page.size' => ["must be less than or equal to #{pagination_max_limit}"]
+    raise InvalidPaginationParams, "page.size" => [ "must be less than or equal to #{pagination_max_limit}" ]
   end
 
   def pagination_default_limit
@@ -70,9 +70,9 @@ module Api::V1::Paginatable
 
     return integer if integer.positive?
 
-    raise InvalidPaginationParams, field => ['must be greater than or equal to 1']
+    raise InvalidPaginationParams, field => [ "must be greater than or equal to 1" ]
   rescue ArgumentError, TypeError
-    raise InvalidPaginationParams, field => ['must be an integer']
+    raise InvalidPaginationParams, field => [ "must be an integer" ]
   end
 
   def pagination_payload(pagy)
@@ -111,6 +111,6 @@ module Api::V1::Paginatable
   end
 
   def render_pagy_option_error(error)
-    render_bad_request('page' => ["invalid pagination option #{error.option}"])
+    render_bad_request("page" => [ "invalid pagination option #{error.option}" ])
   end
 end

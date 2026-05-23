@@ -1,10 +1,6 @@
 class Tasks::OccurrenceBuilder
   def self.call(task:, occurrence_date:, task_occurrence: nil)
-    new(
-      task: task,
-      occurrence_date: occurrence_date,
-      task_occurrence: task_occurrence
-    ).call
+    new(task: task, occurrence_date: occurrence_date, task_occurrence: task_occurrence).call
   end
 
   private_class_method :new

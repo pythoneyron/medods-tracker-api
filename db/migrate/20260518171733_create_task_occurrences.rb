@@ -13,14 +13,14 @@ class CreateTaskOccurrences < ActiveRecord::Migration[8.1]
 
     add_index(
       :task_occurrences,
-      [:task_id, :occurrence_date],
+      [ :task_id, :occurrence_date ],
       unique: true,
       name: 'index_task_occurrences_on_task_and_date'
     )
 
     add_index(
       :task_occurrences,
-      [:occurrence_date, :status],
+      [ :occurrence_date, :status ],
       name: 'index_task_occurrences_on_date_and_status'
     )
 

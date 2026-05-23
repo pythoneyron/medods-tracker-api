@@ -55,7 +55,7 @@ class Tasks::IndexQuery
     return if params[:status].blank?
     return if Task::STATUSES.include?(params[:status])
 
-    errors << 'status is not included in the list'
+    errors << "status is not included in the list"
   end
 
   def build_date_window
@@ -90,7 +90,7 @@ class Tasks::IndexQuery
 
   def validate_date_window(date_from, date_to)
     if date_to < date_from
-      errors << 'date_to must be greater than or equal to date_from'
+      errors << "date_to must be greater than or equal to date_from"
       return
     end
 
@@ -104,7 +104,7 @@ class Tasks::IndexQuery
       .joins(:task)
       .where(tasks: { user_id: user.id })
       .where(occurrence_date: date_window)
-      .index_by { |occurrence| [occurrence.task_id, occurrence.occurrence_date] }
+      .index_by { |occurrence| [ occurrence.task_id, occurrence.occurrence_date ] }
   end
 
   def build_items(date_window, occurrences_by_key)
@@ -119,7 +119,7 @@ class Tasks::IndexQuery
       Tasks::OccurrenceBuilder.call(
         task: task,
         occurrence_date: occurrence_date,
-        task_occurrence: occurrences_by_key[[task.id, occurrence_date]]
+        task_occurrence: occurrences_by_key[[ task.id, occurrence_date ]]
       )
     end
   end
@@ -136,7 +136,7 @@ class Tasks::IndexQuery
         Tasks::OccurrenceBuilder.call(
           task: task,
           occurrence_date: occurrence_date,
-          task_occurrence: occurrences_by_key[[task.id, occurrence_date]]
+          task_occurrence: occurrences_by_key[[ task.id, occurrence_date ]]
         )
       end
     end
@@ -146,7 +146,7 @@ class Tasks::IndexQuery
     user
       .tasks
       .includes(:tags)
-      .where(recurrence_type: 'none')
+      .where(recurrence_type: "none")
       .where(due_date: date_window)
   end
 
@@ -154,9 +154,9 @@ class Tasks::IndexQuery
     user
       .tasks
       .includes(:tags)
-      .where.not(recurrence_type: 'none')
-      .where('recurrence_starts_on <= ?', date_window.end)
-      .where('recurrence_ends_on IS NULL OR recurrence_ends_on >= ?', date_window.begin)
+      .where.not(recurrence_type: "none")
+      .where("recurrence_starts_on <= ?", date_window.end)
+      .where("recurrence_ends_on IS NULL OR recurrence_ends_on >= ?", date_window.begin)
   end
 
   def filter_by_status(items)
@@ -166,6 +166,6 @@ class Tasks::IndexQuery
   end
 
   def sort_items(items)
-    items.sort_by { |item| [item.occurrence_date, item.task_id] }
+    items.sort_by { |item| [ item.occurrence_date, item.task_id ] }
   end
 end

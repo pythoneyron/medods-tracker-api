@@ -26,7 +26,7 @@ FactoryBot.define do
 
     trait :specific_dates do
       recurrence_type { 'specific_dates' }
-      recurrence_config { { 'dates' => [due_date.iso8601] } }
+      recurrence_config { { 'dates' => [ due_date.iso8601 ] } }
       recurrence_starts_on { due_date }
     end
 

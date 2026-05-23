@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 Devise.setup do |config|
-  require 'devise/orm/active_record'
+  require "devise/orm/active_record"
 
   # Email authentication
-  config.case_insensitive_keys = [:email]
-  config.strip_whitespace_keys = [:email]
+  config.case_insensitive_keys = [ :email ]
+  config.strip_whitespace_keys = [ :email ]
 
   # API/JWT mode: do not store users in session after params authentication.
-  config.skip_session_storage = [:http_auth, :params_auth]
+  config.skip_session_storage = [ :http_auth, :params_auth ]
 
   # Password hashing
   config.stretches = Rails.env.test? ? 1 : 12
@@ -33,6 +33,6 @@ Devise.setup do |config|
 
     # one day for test
     jwt.expiration_time = 1.day.to_i
-    jwt.request_formats = { user: [:json] }
+    jwt.request_formats = { user: [ :json ] }
   end
 end

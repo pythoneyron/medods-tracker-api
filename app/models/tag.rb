@@ -28,14 +28,14 @@ class Tag < ApplicationRecord
   def prevent_system_tag_update
     return unless system_in_database
 
-    errors.add(:base, 'System tag cannot be changed')
+    errors.add(:base, "System tag cannot be changed")
     throw(:abort)
   end
 
   def prevent_system_tag_destroy
     return unless system?
 
-    errors.add(:base, 'System tag cannot be deleted')
+    errors.add(:base, "System tag cannot be deleted")
     throw(:abort)
   end
 
@@ -49,8 +49,8 @@ class Tag < ApplicationRecord
         Tag.where(user_id: user_id, system: false)
       end
 
-    return unless relation.where('LOWER(name) = ?', name.downcase).where.not(id: id).exists?
+    return unless relation.where("LOWER(name) = ?", name.downcase).where.not(id: id).exists?
 
-    errors.add(:name, 'has already been taken')
+    errors.add(:name, "has already been taken")
   end
 end

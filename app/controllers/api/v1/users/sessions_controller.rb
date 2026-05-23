@@ -15,7 +15,7 @@ class Api::V1::Users::SessionsController < ApplicationController
   def destroy
     revoke_token!
 
-    render json: { message: 'Signed out successfully' }, status: :ok
+    render json: { message: "Signed out successfully" }, status: :ok
   end
 
   private
@@ -27,8 +27,8 @@ class Api::V1::Users::SessionsController < ApplicationController
   def revoke_token!
     payload = Warden::JWTAuth::TokenDecoder.new.call(raw_token)
 
-    JwtDenylist.find_or_create_by!(jti: payload['jti']) do |denylisted_token|
-      denylisted_token.exp = Time.zone.at(payload['exp'])
+    JwtDenylist.find_or_create_by!(jti: payload["jti"]) do |denylisted_token|
+      denylisted_token.exp = Time.zone.at(payload["exp"])
     end
   end
 

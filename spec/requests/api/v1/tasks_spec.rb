@@ -40,7 +40,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([first_task.id, second_task.id, third_task.id])
+      expect(task_ids_from_response).to eq([ first_task.id, second_task.id, third_task.id ])
       expect(task_ids_from_response).not_to include(other_task.id)
     end
 
@@ -52,7 +52,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       get api_v1_tasks_path, params: { status: 'pending' }, headers: headers
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([matching_task.id])
+      expect(task_ids_from_response).to eq([ matching_task.id ])
     end
 
     it 'filters tasks by an exact due date' do
@@ -62,7 +62,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       get api_v1_tasks_path, params: { date: '2026-05-21' }, headers: headers
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([matching_task.id])
+      expect(task_ids_from_response).to eq([ matching_task.id ])
     end
 
     it 'filters tasks by a due date range' do
@@ -77,7 +77,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([inside_range_task.id, second_inside_range_task.id])
+      expect(task_ids_from_response).to eq([ inside_range_task.id, second_inside_range_task.id ])
     end
 
     it 'returns generated occurrences for recurring tasks inside the requested date range' do
@@ -98,7 +98,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([task.id, task.id, task.id])
+      expect(task_ids_from_response).to eq([ task.id, task.id, task.id ])
       expect(occurrence_dates_from_response).to eq(%w[2026-05-20 2026-05-22 2026-05-24])
       expect(json_body.fetch('tasks').first).to include(
         'task_id' => task.id,
@@ -131,8 +131,8 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([task.id])
-      expect(occurrence_dates_from_response).to eq(['2026-05-21'])
+      expect(task_ids_from_response).to eq([ task.id ])
+      expect(occurrence_dates_from_response).to eq([ '2026-05-21' ])
       expect(json_body.dig('tasks', 0, 'status')).to eq('done')
     end
 
@@ -140,14 +140,14 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       get api_v1_tasks_path, params: { date: 'broken-date' }, headers: headers
 
       expect(response).to have_http_status(:bad_request)
-      expect(json_body).to eq('errors' => { 'base' => ['date must be a valid ISO8601 date'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'date must be a valid ISO8601 date' ] })
     end
 
     it 'returns bad request for an unsupported status filter' do
       get api_v1_tasks_path, params: { status: 'archived' }, headers: headers
 
       expect(response).to have_http_status(:bad_request)
-      expect(json_body).to eq('errors' => { 'base' => ['status is not included in the list'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'status is not included in the list' ] })
     end
 
     it 'returns bad request when date range is too large' do
@@ -158,7 +158,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:bad_request)
-      expect(json_body).to eq('errors' => { 'base' => ['date range cannot be greater than 366 days'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'date range cannot be greater than 366 days' ] })
     end
 
     it 'paginates task occurrence items' do
@@ -177,7 +177,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:ok)
-      expect(task_ids_from_response).to eq([third_task.id])
+      expect(task_ids_from_response).to eq([ third_task.id ])
       expect(task_ids_from_response).not_to include(first_task.id, second_task.id)
       expect(json_body.dig('meta', 'pagination')).to include(
         'current_page' => 2,
@@ -208,7 +208,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       get api_v1_task_path(task), headers: headers
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
   end
 
@@ -291,7 +291,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(json_body).to eq('errors' => { 'title' => ["can't be blank"] })
+      expect(json_body).to eq('errors' => { 'title' => [ "can't be blank" ] })
     end
 
     it 'returns validation errors for invalid recurrence attributes' do
@@ -312,7 +312,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(json_body).to eq('errors' => { 'recurrence_config' => ['interval must be a positive integer'] })
+      expect(json_body).to eq('errors' => { 'recurrence_config' => [ 'interval must be a positive integer' ] })
     end
   end
 
@@ -375,7 +375,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       )
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'returns validation errors for invalid updates' do
@@ -397,7 +397,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(task.reload.status).to eq('pending')
-      expect(json_body).to eq('errors' => { 'status' => ['is not included in the list'] })
+      expect(json_body).to eq('errors' => { 'status' => [ 'is not included in the list' ] })
     end
   end
 
@@ -421,7 +421,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       end.not_to change(Task, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
   end
 

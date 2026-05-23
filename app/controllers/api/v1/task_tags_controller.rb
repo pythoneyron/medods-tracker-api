@@ -12,7 +12,7 @@ class Api::V1::TaskTagsController < Api::V1::BaseController
     @task = @task.reload
 
     render(
-      'api/v1/tasks/show',
+      "api/v1/tasks/show",
       formats: :json,
       status: was_new_record ? :created : :ok
     )

@@ -20,13 +20,13 @@ class Task < ApplicationRecord
   before_validation :set_default_recurrence_values
 
   def recurring?
-    recurrence_type.present? && recurrence_type != 'none'
+    recurrence_type.present? && recurrence_type != "none"
   end
 
   private
 
   def set_default_recurrence_values
-    self.recurrence_type = 'none' if recurrence_type.blank?
+    self.recurrence_type = "none" if recurrence_type.blank?
     self.recurrence_config = {} if recurrence_config.nil?
 
     normalize_non_recurring_fields
@@ -51,7 +51,7 @@ class Task < ApplicationRecord
   def validate_recurrence_config_type
     return if recurrence_config.is_a?(Hash)
 
-    errors.add(:recurrence_config, 'must be an object')
+    errors.add(:recurrence_config, "must be an object")
   end
 
   def validate_recurrence_dates
@@ -63,53 +63,53 @@ class Task < ApplicationRecord
     return if recurrence_ends_on.blank?
     return if recurrence_ends_on >= recurrence_starts_on
 
-    errors.add(:recurrence_ends_on, 'must be greater than or equal to recurrence_starts_on')
+    errors.add(:recurrence_ends_on, "must be greater than or equal to recurrence_starts_on")
   end
 
   def validate_recurrence_config
     return unless recurrence_config.is_a?(Hash)
 
     case recurrence_type
-    when 'daily'
+    when "daily"
       validate_daily_config
-    when 'monthly_day'
+    when "monthly_day"
       validate_monthly_day_config
-    when 'specific_dates'
+    when "specific_dates"
       validate_specific_dates_config
     end
   end
 
   def validate_daily_config
-    interval = integer_config_value('interval')
+    interval = integer_config_value("interval")
 
     if interval.nil?
-      errors.add(:recurrence_config, 'interval is required for daily recurrence')
+      errors.add(:recurrence_config, "interval is required for daily recurrence")
       return
     end
 
     return if interval.positive?
 
-    errors.add(:recurrence_config, 'interval must be a positive integer')
+    errors.add(:recurrence_config, "interval must be a positive integer")
   end
 
   def validate_monthly_day_config
-    day = integer_config_value('day')
+    day = integer_config_value("day")
 
     if day.nil?
-      errors.add(:recurrence_config, 'day is required for monthly_day recurrence')
+      errors.add(:recurrence_config, "day is required for monthly_day recurrence")
       return
     end
 
     return if day.between?(1, 31)
 
-    errors.add(:recurrence_config, 'day must be an integer between 1 and 31')
+    errors.add(:recurrence_config, "day must be an integer between 1 and 31")
   end
 
   def validate_specific_dates_config
-    dates = recurrence_config['dates']
+    dates = recurrence_config["dates"]
 
     unless dates.is_a?(Array) && dates.any?
-      errors.add(:recurrence_config, 'dates must be a non-empty array')
+      errors.add(:recurrence_config, "dates must be a non-empty array")
       return
     end
 

@@ -30,7 +30,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
 
       expect(response).to have_http_status(:created)
       expect(task.reload.tags).to contain_exactly(tag)
-      expect(tag_ids_from_task_response).to eq([tag.id])
+      expect(tag_ids_from_task_response).to eq([ tag.id ])
     end
 
     it 'adds a system tag to the current user task' do
@@ -48,7 +48,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
 
       expect(response).to have_http_status(:created)
       expect(task.reload.tags).to contain_exactly(tag)
-      expect(tag_ids_from_task_response).to eq([tag.id])
+      expect(tag_ids_from_task_response).to eq([ tag.id ])
     end
 
     it 'does not duplicate an existing task tag' do
@@ -66,7 +66,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:ok)
-      expect(tag_ids_from_task_response).to eq([tag.id])
+      expect(tag_ids_from_task_response).to eq([ tag.id ])
     end
 
     it 'returns not found for another user task' do
@@ -83,7 +83,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'returns not found for another user tag' do
@@ -100,7 +100,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
   end
 
@@ -151,7 +151,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'returns not found for another user tag' do
@@ -163,7 +163,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
 
     it 'returns not found when the tag is not attached to the task' do
@@ -175,7 +175,7 @@ RSpec.describe 'Api::V1::TaskTags', type: :request do
       end.not_to change(TaskTag, :count)
 
       expect(response).to have_http_status(:not_found)
-      expect(json_body).to eq('errors' => { 'base' => ['Resource not found'] })
+      expect(json_body).to eq('errors' => { 'base' => [ 'Resource not found' ] })
     end
   end
 

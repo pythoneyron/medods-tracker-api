@@ -11,7 +11,7 @@ json.recurrence_ends_on task.recurrence_ends_on&.iso8601
 json.recurring task.recurring?
 
 json.tags task.tags do |tag|
-  json.partial! 'api/v1/tags/tag', tag: tag
+  json.partial! "api/v1/tags/tag", tag: tag
 end
 
 json.created_at task.created_at&.iso8601

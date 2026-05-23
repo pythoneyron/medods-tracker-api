@@ -13,8 +13,8 @@ class CreateTasks < ActiveRecord::Migration[8.1]
 
     add_index :tasks, :due_date
     add_index :tasks, :status
-    add_index :tasks, [:user_id, :due_date]
-    add_index :tasks, [:user_id, :status]
+    add_index :tasks, [ :user_id, :due_date ]
+    add_index :tasks, [ :user_id, :status ]
 
     add_check_constraint :tasks, "status IN ('planned', 'pending', 'in_progress', 'done', 'cancelled')",
                          name: "task_status_allowed"

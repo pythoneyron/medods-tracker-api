@@ -170,6 +170,13 @@ RSpec.configure do |config|
               updated_at: { type: :string, format: :'date-time', nullable: true }
             }
           },
+          TaskItemResponse: {
+            type: :object,
+            required: %w[task],
+            properties: {
+              task: { '$ref' => '#/components/schemas/TaskItem' }
+            }
+          },
           TasksResponse: {
             type: :object,
             required: %w[tasks meta links],

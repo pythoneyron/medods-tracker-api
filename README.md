@@ -516,11 +516,43 @@ docker compose up --build
 
 Приложение будет доступно на `http://localhost:3000`, PostgreSQL - на `localhost:5432`.
 
+### Seed-данные
+
+Для тестовой работы проекта подготовлены demo-данные в `db/seeds.rb`.
+
+Seeds создают:
+
+- demo-пользователей: `doctor@example.com`, `admin@example.com`, `nurse@example.com`;
+- общий пароль для всех demo-пользователей: `password123`;
+- системные теги: `reporting`, `operations`, `call`;
+- пользовательские теги для каждого demo-пользователя;
+- обычные задачи со всеми поддерживаемыми статусами;
+- повторяющиеся задачи типов `daily`, `monthly_day`, `specific_dates`, `even_days`, `odd_days`;
+- связи задач и тегов;
+- `task_occurrences` с индивидуальными статусами экземпляров повторяющихся задач.
+
+Запуск без Docker:
+
+```bash
+bin/rails db:prepare
+bin/rails db:seed
+```
+
+Запуск через Docker Compose:
+
+```bash
+docker compose run --rm --entrypoint "" web bin/rails db:prepare
+docker compose run --rm --entrypoint "" web bin/rails db:seed
+```
+
+Seeds идемпотентны: повторный запуск обновляет demo-данные и не создает дубли. После заполнения можно авторизоваться в API под `doctor@example.com` / `password123` и использовать эти данные для ручной проверки или Postman-коллекции.
+
 ## Полезные команды
 
 ```bash
 bin/setup                         # установка зависимостей и подготовка проекта
 bin/rails db:prepare              # создание и миграция БД
+bin/rails db:seed                 # заполнение demo-данными
 bundle exec rspec                 # запуск тестов
 bundle exec rails rswag:specs:swaggerize
 bin/rubocop                       # проверка Ruby-стиля
@@ -528,4 +560,5 @@ bin/brakeman                      # security scan Rails-кода
 bin/bundler-audit                 # проверка гемов на известные уязвимости
 bin/ci                            # локальный CI-пайплайн
 docker compose up --build         # запуск приложения и PostgreSQL в контейнерах
+docker compose run --rm --entrypoint "" web bin/rails db:seed
 ```
